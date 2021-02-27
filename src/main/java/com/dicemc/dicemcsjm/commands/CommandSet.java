@@ -2,8 +2,8 @@ package com.dicemc.dicemcsjm.commands;
 
 import com.dicemc.dicemcsjm.Config;
 import com.dicemc.dicemcsjm.WSD;
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
@@ -12,21 +12,30 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
-public class CommandSet implements Command<CommandSource>{
-	private static final CommandSet CMD = new CommandSet();
+public class CommandSet{
 	
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal("setjail")
 				.requires((p) -> p.hasPermissionLevel(Config.JAILER_PERM_LEVEL.get()))
-				.executes(CMD));		
+				.executes((p) -> {return run(p);})
+				.then(Commands.argument("prison", StringArgumentType.word())
+						.executes((p) -> {return runWithPrison(p);})));		
 	}
 
-	@Override
-	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+	public static int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		BlockPos p = context.getSource().asPlayer().getPosition();
-		WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD)).setJailPos(p);
+		WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD)).setJailPos("default", p);
 		WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD)).markDirty();
-		context.getSource().asPlayer().sendMessage(new TranslationTextComponent("msg.setjail", p.toString()), context.getSource().asPlayer().getUniqueID());
+		context.getSource().asPlayer().sendMessage(new TranslationTextComponent("msg.setjail", "default", p.toString()), context.getSource().asPlayer().getUniqueID());
+		return 0;
+	}
+	
+	public static int runWithPrison(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		String prison = StringArgumentType.getString(context, "prison");
+		BlockPos p = context.getSource().asPlayer().getPosition();
+		WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD)).setJailPos(prison, p);
+		WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD)).markDirty();
+		context.getSource().asPlayer().sendMessage(new TranslationTextComponent("msg.setjail", prison, p.toString()), context.getSource().asPlayer().getUniqueID());
 		return 0;
 	}
 	

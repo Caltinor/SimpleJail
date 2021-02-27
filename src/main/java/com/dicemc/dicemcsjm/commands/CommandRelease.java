@@ -13,7 +13,6 @@ import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 
 public class CommandRelease implements Command<CommandSource>{
 	private static final CommandRelease CMD = new CommandRelease();
@@ -33,10 +32,8 @@ public class CommandRelease implements Command<CommandSource>{
 			context.getSource().sendFeedback(new TranslationTextComponent("msg.error.noplayer"), false);
 			return 0;
 		}			
-		wsd.getJailed().remove(player.getUniqueID());
+		wsd.getJailed().get(player.getUniqueID()).duration = System.currentTimeMillis();
 		wsd.markDirty();
-		ServerWorld world = context.getSource().getWorld();
-		player.forceSetPosition(world.getSpawnPoint().getX(), world.getSpawnPoint().getY()+1, world.getSpawnPoint().getZ());
 		return 0;
 	}
 	

@@ -9,7 +9,7 @@ license="ARR License"
 
 [[mods]] #mandatory
 modId="dicemcsjm" #mandatory
-version="1.16.5-1.0" #mandatory
+version="1.16.5-1.1" #mandatory
 displayName="Simple Jail Mod" #mandatory
 #updateJSONURL=""
 description='''

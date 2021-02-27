@@ -32,7 +32,7 @@ public class EventHandler {
 	@SubscribeEvent
 	public static void onServerStart(FMLServerStartingEvent event) {
 		SimpleJail.jailWorld = event.getServer().getWorld(World.OVERWORLD);
-		BlockPos p = WSD.get(SimpleJail.jailWorld).getJailPos();
+		BlockPos p = WSD.get(SimpleJail.jailWorld).getJailPos("default");
 		LOG.info("SimpleJail Jail Position: ["+p.getX()+", "+p.getY()+", "+p.getZ()+"]");
 	}
 	
@@ -79,22 +79,25 @@ public class EventHandler {
 			if (SimpleJail.jailWorld == null) return;
 			ServerWorld world = SimpleJail.jailWorld;			
 			if ((world.getGameTime() % 200) == 0) {
-				BlockPos p = WSD.get(world).getJailPos();
 				for (Map.Entry<UUID, Sentence> population : WSD.get(world).getJailed().entrySet()) {
-					//loop through and release people who are not jailed anymore
+					ServerPlayerEntity player = world.getServer().getPlayerList().getPlayerByUUID(population.getKey());
+					if (player == null) continue;
+					BlockPos p = WSD.get(world).getJailPos(population.getValue().prison);
+					//loop through and release people who are not jailed anymore					
 					if (population.getValue().duration <= System.currentTimeMillis()) {
 						WSD.get(world).getJailed().remove(population.getKey());
 						WSD.get(world).markDirty();
-						world.getPlayerByUuid(population.getKey()).forceSetPosition(world.getSpawnPoint().getX(), world.getSpawnPoint().getY()+1, world.getSpawnPoint().getZ());
+						if (!population.getValue().severity.equals(Type.SILENCED)) {
+							player.inventory.read(population.getValue().inv);
+							player.forceSetPosition(world.getSpawnPoint().getX(), world.getSpawnPoint().getY()+1, world.getSpawnPoint().getZ());
+						}
 					}
 					//check for out of place players and return them to jail
 					else {
-						if (population.getValue().severity.equals(Type.SILENCED)) return;
-						ServerPlayerEntity player = (ServerPlayerEntity) world.getPlayerByUuid(population.getKey());
-						BlockPos c = player.getPosition();
-						if (c.distanceSq(p.getX(), p.getY(), p.getZ(), true) >= 100) {
-							player.forceSetPosition(p.getX(), p.getY(), p.getZ());
-						}
+						if (population.getValue().severity.equals(Type.SILENCED)) continue;					
+							BlockPos c = player.getPosition();
+							if (c.distanceSq(p.getX(), p.getY(), p.getZ(), true) >= 100)
+								player.forceSetPosition(p.getX(), p.getY(), p.getZ());
 					}
 				}				
 			}

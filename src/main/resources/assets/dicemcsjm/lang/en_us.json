@@ -1,5 +1,5 @@
 {
 	"msg.error.noplayer":"Player is not currently jailed",
-	"msg.jail.success":"%s has been sentenced to %s for %s",
-	"msg.setjail":"Jail position set to %s"
+	"msg.jail.success":"%s has been sentenced to %s for %s in %s jail",
+	"msg.setjail":"Position of %s Jail  set to %s"
 }
