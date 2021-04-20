@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.dicemc.dicemcsjm.SimpleJail.Type;
-
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
@@ -17,27 +16,32 @@ public class WSD extends WorldSavedData{
 	private static final String DATA_NAME = SimpleJail.MOD_ID + "_jaildata";
 	
 	private Map<UUID, Sentence> jailMap = new HashMap<UUID, Sentence>();
-	private Map<String, BlockPos> jailPos = new HashMap<String, BlockPos>();
-	private BlockPos defaultJail = new BlockPos(0,255, 0);
+	private Map<String, Prison> jailPos = new HashMap<String, Prison>();
+	private Prison defaultJail = new Prison("default", new BlockPos(0, 0, 0), new BlockPos(0, 0, 0), 100);
 	
 	public Map<UUID, Sentence> getJailed() {return jailMap;}
-	public BlockPos getJailPos(String prison) {return jailPos.getOrDefault(prison, defaultJail);}
-	public void setJailPos(String prisonName, BlockPos pos) {
-		if (prisonName.equalsIgnoreCase("default")) {
-			defaultJail = pos;
+	public BlockPos getJailPos(String prison) {return jailPos.getOrDefault(prison, defaultJail).jailPos;}
+	public BlockPos getJailReleasePos(String prison) {return jailPos.getOrDefault(prison, defaultJail).releasePos;}
+	public int getJailLeash(String prison) {return jailPos.getOrDefault(prison, defaultJail).leash;}
+	public Prison getPrison(String prison) {return jailPos.getOrDefault(prison, defaultJail);}
+	public void setJail(Prison prison) {
+		if (prison.name.equalsIgnoreCase("default")) {
+			defaultJail = prison;
 			return;
 		}
-		jailPos.put(prisonName, pos);
+		jailPos.put(prison.name, prison);
 	}
+	public boolean existingJail(String prison) {return jailPos.containsKey(prison) || prison.equalsIgnoreCase("default");}
 	
 	public WSD() {super(DATA_NAME);}
 
 	@Override
 	public void read(CompoundNBT nbt) {
-		defaultJail = BlockPos.fromLong(nbt.getLong("defaultprison"));
+		defaultJail = new Prison(nbt.getCompound("defaultprison"));
 		ListNBT list = nbt.getList("prisons", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < list.size(); i++) {
-			jailPos.put(list.getCompound(i).getString("prison"), BlockPos.fromLong(list.getCompound(i).getLong("pos")));
+			Prison prison = new Prison(list.getCompound(i));
+			jailPos.put(prison.name, prison);
 		}
 		list = nbt.getList("jailmap", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < list.size(); i++) {
@@ -55,13 +59,10 @@ public class WSD extends WorldSavedData{
 	@Override
 	public CompoundNBT write(CompoundNBT compound) {
 		compound = new CompoundNBT();
-		compound.putLong("defaultprison", defaultJail.toLong());
+		compound.put("defaultprison", defaultJail.toNBT(new CompoundNBT()));
 		ListNBT list = new ListNBT();
-		for (Map.Entry<String, BlockPos> map : jailPos.entrySet()) {
-			CompoundNBT nbt = new CompoundNBT();
-			nbt.putString("prison", map.getKey());
-			nbt.putLong("pos", map.getValue().toLong());
-			list.add(nbt);
+		for (Map.Entry<String, Prison> map : jailPos.entrySet()) {
+			list.add(map.getValue().toNBT(new CompoundNBT()));
 		}
 		compound.put("prisons", list);
 		list = new ListNBT();

@@ -8,6 +8,7 @@ import com.dicemc.dicemcsjm.SimpleJail.Type;
 import com.dicemc.dicemcsjm.commands.CommandRelease;
 import com.dicemc.dicemcsjm.commands.CommandRoot;
 import com.dicemc.dicemcsjm.commands.CommandSet;
+import com.dicemc.dicemcsjm.commands.CommandSetRelease;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.util.math.BlockPos;
@@ -31,9 +32,20 @@ public class EventHandler {
 	
 	@SubscribeEvent
 	public static void onServerStart(FMLServerStartingEvent event) {
-		SimpleJail.jailWorld = event.getServer().getWorld(World.OVERWORLD);
-		BlockPos p = WSD.get(SimpleJail.jailWorld).getJailPos("default");
-		LOG.info("SimpleJail Jail Position: ["+p.getX()+", "+p.getY()+", "+p.getZ()+"]");
+		Iterable<ServerWorld> worlds = event.getServer().getWorlds();
+		for (ServerWorld world : worlds) {
+			BlockPos p = WSD.get(world).getJailPos("default");
+			if (p.getX() == 0 && p.getY() == 0 && p.getZ() ==0) {
+				BlockPos s = world.getSpawnPoint();
+				Prison defaultPrison = WSD.get(world).getPrison("default");
+				defaultPrison.jailPos = s;
+				defaultPrison.releasePos = s;
+				WSD.get(world).setJail(defaultPrison);
+				p = s;
+			}	
+			LOG.info("SimpleJail "+world.getDimensionKey().toString()+" Jail Position: ["+p.getX()+", "+p.getY()+", "+p.getZ()+"]");
+		}
+		
 	}
 	
 	@SubscribeEvent
@@ -41,6 +53,7 @@ public class EventHandler {
 		CommandRoot.register(event.getDispatcher());
 		CommandSet.register(event.getDispatcher());
 		CommandRelease.register(event.getDispatcher());
+		CommandSetRelease.register(event.getDispatcher());
 	}
 
 	@SubscribeEvent
@@ -81,23 +94,25 @@ public class EventHandler {
 			if ((world.getGameTime() % 200) == 0) {
 				for (Map.Entry<UUID, Sentence> population : WSD.get(world).getJailed().entrySet()) {
 					ServerPlayerEntity player = world.getServer().getPlayerList().getPlayerByUUID(population.getKey());
-					if (player == null) continue;
-					BlockPos p = WSD.get(world).getJailPos(population.getValue().prison);
+					if (player == null) continue;					
 					//loop through and release people who are not jailed anymore					
 					if (population.getValue().duration <= System.currentTimeMillis()) {
 						WSD.get(world).getJailed().remove(population.getKey());
 						WSD.get(world).markDirty();
 						if (!population.getValue().severity.equals(Type.SILENCED)) {
 							player.inventory.read(population.getValue().inv);
-							player.forceSetPosition(world.getSpawnPoint().getX(), world.getSpawnPoint().getY()+1, world.getSpawnPoint().getZ());
+							BlockPos r = WSD.get(world).getJailReleasePos(population.getValue().prison);
+							player.forceSetPosition(r.getX(), r.getY()+1, r.getZ());
 						}
 					}
 					//check for out of place players and return them to jail
 					else {
-						if (population.getValue().severity.equals(Type.SILENCED)) continue;					
-							BlockPos c = player.getPosition();
-							if (c.distanceSq(p.getX(), p.getY(), p.getZ(), true) >= 100)
-								player.forceSetPosition(p.getX(), p.getY(), p.getZ());
+						if (population.getValue().severity.equals(Type.SILENCED)) {continue;}					
+						BlockPos c = player.getPosition();
+						BlockPos p = WSD.get(world).getJailPos(population.getValue().prison);
+						int leash = WSD.get(world).getJailLeash(population.getValue().prison);
+						if (c.distanceSq(p.getX(), p.getY(), p.getZ(), true) >= leash)
+							player.forceSetPosition(p.getX(), p.getY(), p.getZ());
 					}
 				}				
 			}
