@@ -3,5 +3,6 @@
 	"msg.jail.success":"%s has been sentenced to %s for %s in %s jail",
 	"msg.setjail":"Position of %s Jail  set to %s",
 	"msg.setrelease.success":"%s jail release location set to %s",
-	"msg.setrelease.failure":"%s not found"
+	"msg.setrelease.failure":"%s not found",
+	"msg.release.success":"%s released"
 }

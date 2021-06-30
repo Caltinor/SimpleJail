@@ -18,7 +18,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 
 public class CommandRoot {
 	
@@ -48,7 +47,7 @@ public class CommandRoot {
 	}
 
 	public static int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		WSD wsd = WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD));
+		WSD wsd = WSD.get(context.getSource().getWorld());
 		//arguments to variables
 		ServerPlayerEntity convicted = EntityArgument.getPlayer(context, "target");
 		Type type = parseType(StringArgumentType.getString(context, "judgement").toUpperCase());
@@ -74,7 +73,7 @@ public class CommandRoot {
 	
 	public static int runWithPrison(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		String prison = StringArgumentType.getString(context, "prison");
-		WSD wsd = WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD));
+		WSD wsd = WSD.get(context.getSource().getWorld());
 		//arguments to variables
 		ServerPlayerEntity convicted = EntityArgument.getPlayer(context, "target");
 		Type type = parseType(StringArgumentType.getString(context, "judgement").toUpperCase());

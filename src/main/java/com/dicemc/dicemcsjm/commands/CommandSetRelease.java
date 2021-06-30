@@ -12,7 +12,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 
 public class CommandSetRelease{
 	
@@ -25,7 +24,7 @@ public class CommandSetRelease{
 	}
 	
 	public static int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		WSD wsd = WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD));
+		WSD wsd = WSD.get(context.getSource().getWorld());
 		BlockPos p = context.getSource().asPlayer().getPosition();
 		Prison ogp = wsd.getPrison("default");
 		ogp.releasePos = p;
@@ -35,7 +34,7 @@ public class CommandSetRelease{
 	}
 	
 	public static int runWithPrison(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		WSD wsd = WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD));
+		WSD wsd = WSD.get(context.getSource().getWorld());
 		BlockPos p = context.getSource().asPlayer().getPosition();
 		String prison = StringArgumentType.getString(context, "prison");
 		if (wsd.existingJail(prison)) {

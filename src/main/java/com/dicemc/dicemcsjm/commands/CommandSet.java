@@ -12,7 +12,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 
 public class CommandSet{
 	
@@ -27,7 +26,7 @@ public class CommandSet{
 	}
 
 	public static int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		WSD wsd = WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD));
+		WSD wsd = WSD.get(context.getSource().getWorld());
 		BlockPos p = context.getSource().asPlayer().getPosition();
 		BlockPos r = wsd.getJailReleasePos("default");
 		wsd.setJail(new Prison("default", p, r, 100));
@@ -37,7 +36,7 @@ public class CommandSet{
 	}
 	
 	public static int runWithLeash(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		WSD wsd = WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD));
+		WSD wsd = WSD.get(context.getSource().getWorld());
 		BlockPos p = context.getSource().asPlayer().getPosition();
 		BlockPos r = wsd.getJailReleasePos("default");
 		int leash = IntegerArgumentType.getInteger(context, "leash");
@@ -48,7 +47,7 @@ public class CommandSet{
 	}
 	
 	public static int runWithPrison(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		WSD wsd = WSD.get(context.getSource().getServer().getWorld(World.OVERWORLD));
+		WSD wsd = WSD.get(context.getSource().getWorld());
 		String prison = StringArgumentType.getString(context, "prison");
 		BlockPos p = context.getSource().asPlayer().getPosition();
 		BlockPos r = wsd.existingJail(prison) ? wsd.getJailReleasePos(prison) : context.getSource().getWorld().getSpawnPoint();

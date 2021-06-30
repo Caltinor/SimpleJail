@@ -1,6 +1,6 @@
 package com.dicemc.dicemcsjm;
 
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -13,7 +13,7 @@ public class SimpleJail {
 	public static enum Type {DETAINED, SILENCED, SOLITARY}
 	public static enum Interval {MINUTES, HOURS, DAYS, WEEKS, MONTHS, YEARS}
 	
-	public static ServerWorld jailWorld;
+	public static MinecraftServer jailServer;
 	
 	public SimpleJail() {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
