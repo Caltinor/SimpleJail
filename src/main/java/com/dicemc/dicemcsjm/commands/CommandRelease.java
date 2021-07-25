@@ -7,39 +7,39 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.server.ServerWorld;
 
-public class CommandRelease implements Command<CommandSourceStack>{
+public class CommandRelease implements Command<CommandSource>{
 	private static final CommandRelease CMD = new CommandRelease();
 	
-	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal("release")
-				.requires((p) -> p.hasPermission(Config.JAILER_PERM_LEVEL.get()))
+				.requires((p) -> p.hasPermissionLevel(Config.JAILER_PERM_LEVEL.get()))
 				.then(Commands.argument("target", EntityArgument.player())
 						.executes(CMD)));
 	}
 
 	@Override
-	public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		ServerPlayer player = EntityArgument.getPlayer(context, "target");
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		ServerPlayerEntity player = EntityArgument.getPlayer(context, "target");
 		boolean found = false;
 		
-		for (ServerLevel world : context.getSource().getServer().getAllLevels()) {
+		for (ServerWorld world : context.getSource().getServer().getWorlds()) {
 			WSD wsd = WSD.get(world);			
-			if (wsd.getJailed().containsKey(player.getUUID())) {
-				wsd.getJailed().get(player.getUUID()).duration = System.currentTimeMillis();
-				wsd.setDirty();
-				context.getSource().sendSuccess(new TranslatableComponent("msg.release.success", player.getDisplayName()), false);
+			if (wsd.getJailed().containsKey(player.getUniqueID())) {
+				wsd.getJailed().get(player.getUniqueID()).duration = System.currentTimeMillis();
+				wsd.markDirty();
+				context.getSource().sendFeedback(new TranslationTextComponent("msg.release.success", player.getDisplayName()), false);
 				found = true;
 				break;
 			}			
 		}
-		if (!found) context.getSource().sendFailure(new TranslatableComponent("msg.error.noplayer"));
+		if (!found) context.getSource().sendErrorMessage(new TranslationTextComponent("msg.error.noplayer"));
 		return 0;
 	}
 	

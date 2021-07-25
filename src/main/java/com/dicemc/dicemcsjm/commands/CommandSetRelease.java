@@ -8,43 +8,43 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class CommandSetRelease{
 	
-	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal("setrelease")
-				.requires((p) -> p.hasPermission(Config.JAILER_PERM_LEVEL.get()))
+				.requires((p) -> p.hasPermissionLevel(Config.JAILER_PERM_LEVEL.get()))
 				.executes((p) -> {return run(p);})
 				.then(Commands.argument("prison", StringArgumentType.word())
 						.executes((p) -> {return runWithPrison(p);})));
 	}
 	
-	public static int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		WSD wsd = WSD.get(context.getSource().getLevel());
-		BlockPos p = context.getSource().getPlayerOrException().blockPosition();
+	public static int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		WSD wsd = WSD.get(context.getSource().getWorld());
+		BlockPos p = context.getSource().asPlayer().getPosition();
 		Prison ogp = wsd.getPrison("default");
 		ogp.releasePos = p;
 		wsd.setJail(ogp);
-		context.getSource().getPlayerOrException().sendMessage(new TranslatableComponent("msg.setrelease.success", "Default", p.toString()), context.getSource().getPlayerOrException().getUUID());
+		context.getSource().asPlayer().sendMessage(new TranslationTextComponent("msg.setrelease.success", "Default", p.toString()), context.getSource().asPlayer().getUniqueID());
 		return 0;
 	}
 	
-	public static int runWithPrison(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		WSD wsd = WSD.get(context.getSource().getLevel());
-		BlockPos p = context.getSource().getPlayerOrException().blockPosition();
+	public static int runWithPrison(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		WSD wsd = WSD.get(context.getSource().getWorld());
+		BlockPos p = context.getSource().asPlayer().getPosition();
 		String prison = StringArgumentType.getString(context, "prison");
 		if (wsd.existingJail(prison)) {
 			Prison ogp = wsd.getPrison(prison);
 			ogp.releasePos = p;
 			wsd.setJail(ogp);
-			context.getSource().getPlayerOrException().sendMessage(new TranslatableComponent("msg.setrelease.success", prison, p.toString()), context.getSource().getPlayerOrException().getUUID());
+			context.getSource().asPlayer().sendMessage(new TranslationTextComponent("msg.setrelease.success", prison, p.toString()), context.getSource().asPlayer().getUniqueID());
 			return 0;
 		}
-		context.getSource().getPlayerOrException().sendMessage(new TranslatableComponent("msg.setrelease.failure", prison), context.getSource().getPlayerOrException().getUUID());
+		context.getSource().asPlayer().sendMessage(new TranslationTextComponent("msg.setrelease.failure", prison), context.getSource().asPlayer().getUniqueID());
 		return 1;
 	}
 }

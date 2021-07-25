@@ -1,7 +1,7 @@
 package com.dicemc.dicemcsjm;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.math.BlockPos;
 
 public class Prison {
 	public String name;
@@ -20,17 +20,17 @@ public class Prison {
 	public Prison(String name, BlockPos jailPos, int leash) {
 		this(name, jailPos, jailPos, leash);
 	}
-	public Prison(CompoundTag nbt) {
+	public Prison(CompoundNBT nbt) {
 		name = nbt.getString("prison");
-		jailPos = BlockPos.of(nbt.getLong("pos"));
-		releasePos = BlockPos.of(nbt.getLong("release"));
+		jailPos = BlockPos.fromLong(nbt.getLong("pos"));
+		releasePos = BlockPos.fromLong(nbt.getLong("release"));
 		leash = nbt.getInt("leash");
 	}
 	
-	public CompoundTag toNBT(CompoundTag nbt) {
+	public CompoundNBT toNBT(CompoundNBT nbt) {
 		nbt.putString("prison", name);
-		nbt.putLong("pos", jailPos.asLong());
-		nbt.putLong("release", releasePos.asLong());
+		nbt.putLong("pos", jailPos.toLong());
+		nbt.putLong("release", releasePos.toLong());
 		nbt.putInt("leash", leash);
 		return nbt;
 	}
