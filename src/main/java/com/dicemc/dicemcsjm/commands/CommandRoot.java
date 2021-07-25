@@ -10,20 +10,20 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class CommandRoot {
 	
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("jail")
-				.requires((p) -> p.hasPermissionLevel(Config.JAILER_PERM_LEVEL.get()))
+				.requires((p) -> p.hasPermission(Config.JAILER_PERM_LEVEL.get()))
 				.then(Commands.argument("target", EntityArgument.player())
 					.then(Commands.argument("judgement", StringArgumentType.word())
 						.suggests((c, b) -> b
@@ -46,54 +46,54 @@ public class CommandRoot {
 						.executes((p) -> {return runWithPrison(p);})))))));
 	}
 
-	public static int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		WSD wsd = WSD.get(context.getSource().getWorld());
+	public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		WSD wsd = WSD.get(context.getSource().getLevel());
 		//arguments to variables
-		ServerPlayerEntity convicted = EntityArgument.getPlayer(context, "target");
+		ServerPlayer convicted = EntityArgument.getPlayer(context, "target");
 		Type type = parseType(StringArgumentType.getString(context, "judgement").toUpperCase());
 		int duration = IntegerArgumentType.getInteger(context, "duration");
 		Interval interval = parseInterval(StringArgumentType.getString(context, "interval").toUpperCase());
 		//processing and saving
 		long release = System.currentTimeMillis() + durationToLong(duration, interval);
-		Sentence stc = new Sentence(release, type, "default", convicted.inventory.write(new ListNBT()));
-		wsd.getJailed().put(convicted.getUniqueID(), stc);
-		wsd.markDirty();
+		Sentence stc = new Sentence(release, type, "default", convicted.getInventory().save(new ListTag()));
+		wsd.getJailed().put(convicted.getUUID(), stc);
+		wsd.setDirty();
 		//update player location to jail if severity is not silenced		
 		if (!type.equals(Type.SILENCED)) {
 			BlockPos p = wsd.getJailPos("default");
-			convicted.inventory.clear();
-			convicted.setBedPosition(p);
-			convicted.forceSetPosition(p.getX(), p.getY(), p.getZ());
+			convicted.getInventory().clearContent();
+			convicted.setSleepingPos(p);
+			convicted.setPosRaw(p.getX(), p.getY(), p.getZ());
 		}
 		context.getSource().getServer().getPlayerList()
-			.func_232641_a_(new TranslationTextComponent("msg.jail.success", convicted.getName(), type.toString(), String.valueOf(duration) + " " + interval.toString(), "default")
-				, ChatType.CHAT, context.getSource().asPlayer().getUniqueID());
+			.broadcastMessage(new TranslatableComponent("msg.jail.success", convicted.getName(), type.toString(), String.valueOf(duration) + " " + interval.toString(), "default")
+				, ChatType.CHAT, context.getSource().getPlayerOrException().getUUID());
 		return 0;
 	}
 	
-	public static int runWithPrison(CommandContext<CommandSource> context) throws CommandSyntaxException {
+	public static int runWithPrison(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 		String prison = StringArgumentType.getString(context, "prison");
-		WSD wsd = WSD.get(context.getSource().getWorld());
+		WSD wsd = WSD.get(context.getSource().getLevel());
 		//arguments to variables
-		ServerPlayerEntity convicted = EntityArgument.getPlayer(context, "target");
+		ServerPlayer convicted = EntityArgument.getPlayer(context, "target");
 		Type type = parseType(StringArgumentType.getString(context, "judgement").toUpperCase());
 		int duration = IntegerArgumentType.getInteger(context, "duration");
 		Interval interval = parseInterval(StringArgumentType.getString(context, "interval").toUpperCase());
 		//processing and saving
 		long release = System.currentTimeMillis() + durationToLong(duration, interval);
-		Sentence stc = new Sentence(release, type, prison, convicted.inventory.write(new ListNBT()));
-		wsd.getJailed().put(convicted.getUniqueID(), stc);
-		wsd.markDirty();
+		Sentence stc = new Sentence(release, type, prison, convicted.getInventory().save(new ListTag()));
+		wsd.getJailed().put(convicted.getUUID(), stc);
+		wsd.setDirty();
 		//update player location to jail if severity is not silenced		
 		if (!type.equals(Type.SILENCED)) {
 			BlockPos p = wsd.getJailPos(prison);
-			convicted.inventory.clear();
-			convicted.setBedPosition(p);
-			convicted.forceSetPosition(p.getX(), p.getY(), p.getZ());
+			convicted.getInventory().clearContent();
+			convicted.setSleepingPos(p);
+			convicted.setPosRaw(p.getX(), p.getY(), p.getZ());
 		}
 		context.getSource().getServer().getPlayerList()
-			.func_232641_a_(new TranslationTextComponent("msg.jail.success", convicted.getName(), type.toString(), String.valueOf(duration) + " " + interval.toString(), prison)
-				, ChatType.CHAT, context.getSource().asPlayer().getUniqueID());
+			.broadcastMessage(new TranslatableComponent("msg.jail.success", convicted.getName(), type.toString(), String.valueOf(duration) + " " + interval.toString(), prison)
+				, ChatType.CHAT, context.getSource().getPlayerOrException().getUUID());
 		return 0;
 	}
 	
