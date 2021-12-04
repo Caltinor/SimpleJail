@@ -7,10 +7,10 @@ import java.util.UUID;
 import com.dicemc.dicemcsjm.SimpleJail.Type;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.common.util.Constants;
 
 public class WSD extends SavedData{
 	private static final String DATA_NAME = SimpleJail.MOD_ID + "_jaildata";
@@ -38,15 +38,15 @@ public class WSD extends SavedData{
 
 	public void load(CompoundTag nbt) {
 		defaultJail = new Prison(nbt.getCompound("defaultprison"));
-		ListTag list = nbt.getList("prisons", Constants.NBT.TAG_COMPOUND);
+		ListTag list = nbt.getList("prisons", Tag.TAG_COMPOUND);
 		for (int i = 0; i < list.size(); i++) {
 			Prison prison = new Prison(list.getCompound(i));
 			jailPos.put(prison.name, prison);
 		}
-		list = nbt.getList("jailmap", Constants.NBT.TAG_COMPOUND);
+		list = nbt.getList("jailmap", Tag.TAG_COMPOUND);
 		for (int i = 0; i < list.size(); i++) {
 			UUID pid = list.getCompound(i).getUUID("pid");
-			ListTag invList = list.getCompound(i).getList("inv", Constants.NBT.TAG_COMPOUND);
+			ListTag invList = list.getCompound(i).getList("inv", Tag.TAG_COMPOUND);
 			Sentence stc = new Sentence(
 					list.getCompound(i).getLong("duration"), 
 					Type.values()[list.getCompound(i).getInt("severity")],

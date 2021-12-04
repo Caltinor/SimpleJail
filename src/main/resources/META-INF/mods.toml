@@ -1,5 +1,5 @@
 modLoader="javafml" #mandatory
-loaderVersion="[32,)" #mandatory
+loaderVersion="[38,)" #mandatory
 issueTrackerURL="https://github.com/caltinor" #optional
 displayURL="https://github.com/caltinor" #optional
 #logoFile="" #optional
@@ -9,7 +9,7 @@ license="ARR License"
 
 [[mods]] #mandatory
 modId="dicemcsjm" #mandatory
-version="1.16.5-1.1.2" #mandatory
+version="${file.jarVersion}" #mandatory
 displayName="Simple Jail Mod" #mandatory
 #updateJSONURL=""
 description='''
@@ -19,12 +19,12 @@ A simple server-side jailing mod
 [[dependencies.dicemcsjm]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[32.0.1,)" #mandatory
+    versionRange="[38.0.1,)" #mandatory
     ordering="NONE"
     side="BOTH"
 [[dependencies.dicemcsjm]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.1,1.17)"
+    versionRange="[1.18,1.19)"
     ordering="NONE"
     side="BOTH"

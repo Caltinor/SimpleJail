@@ -20,17 +20,17 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 
 @Mod.EventBusSubscriber(modid=SimpleJail.MOD_ID, bus=Mod.EventBusSubscriber.Bus.FORGE)
 public class EventHandler {
 	private static final Logger LOG = Logger.getLogger(SimpleJail.MOD_ID);
 	
 	@SubscribeEvent
-	public static void onServerStart(FMLServerStartingEvent event) {
+	public static void onServerStart(ServerStartingEvent event) {
 		SimpleJail.jailServer = event.getServer();
 		Iterable<ServerLevel> worlds = event.getServer().getAllLevels();
 		for (ServerLevel world : worlds) {
