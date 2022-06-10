@@ -11,7 +11,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class CommandSetRelease{
 	
@@ -29,7 +29,7 @@ public class CommandSetRelease{
 		Prison ogp = wsd.getPrison("default");
 		ogp.releasePos = p;
 		wsd.setJail(ogp);
-		context.getSource().getPlayerOrException().sendMessage(new TranslatableComponent("msg.setrelease.success", "Default", p.toString()), context.getSource().getPlayerOrException().getUUID());
+		context.getSource().getPlayerOrException().sendSystemMessage(Component.translatable("msg.setrelease.success", "Default", p.toString()));
 		return 0;
 	}
 	
@@ -41,10 +41,10 @@ public class CommandSetRelease{
 			Prison ogp = wsd.getPrison(prison);
 			ogp.releasePos = p;
 			wsd.setJail(ogp);
-			context.getSource().getPlayerOrException().sendMessage(new TranslatableComponent("msg.setrelease.success", prison, p.toString()), context.getSource().getPlayerOrException().getUUID());
+			context.getSource().getPlayerOrException().sendSystemMessage(Component.translatable("msg.setrelease.success", prison, p.toString()));
 			return 0;
 		}
-		context.getSource().getPlayerOrException().sendMessage(new TranslatableComponent("msg.setrelease.failure", prison), context.getSource().getPlayerOrException().getUUID());
+		context.getSource().getPlayerOrException().sendSystemMessage(Component.translatable("msg.setrelease.failure", prison));
 		return 1;
 	}
 }

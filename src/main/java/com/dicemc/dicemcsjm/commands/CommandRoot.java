@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class CommandRoot {
 	
@@ -66,8 +66,8 @@ public class CommandRoot {
 			convicted.setPosRaw(p.getX(), p.getY(), p.getZ());
 		}
 		context.getSource().getServer().getPlayerList()
-			.broadcastMessage(new TranslatableComponent("msg.jail.success", convicted.getName(), type.toString(), String.valueOf(duration) + " " + interval.toString(), "default")
-				, ChatType.CHAT, context.getSource().getPlayerOrException().getUUID());
+			.broadcastSystemMessage(Component.translatable("msg.jail.success", convicted.getName(), type.toString(), String.valueOf(duration) + " " + interval.toString(), "default")
+				, ChatType.CHAT);
 		return 0;
 	}
 	
@@ -92,8 +92,8 @@ public class CommandRoot {
 			convicted.setPosRaw(p.getX(), p.getY(), p.getZ());
 		}
 		context.getSource().getServer().getPlayerList()
-			.broadcastMessage(new TranslatableComponent("msg.jail.success", convicted.getName(), type.toString(), String.valueOf(duration) + " " + interval.toString(), prison)
-				, ChatType.CHAT, context.getSource().getPlayerOrException().getUUID());
+			.broadcastSystemMessage(Component.translatable("msg.jail.success", convicted.getName(), type.toString(), String.valueOf(duration) + " " + interval.toString(), prison)
+				, ChatType.CHAT);
 		return 0;
 	}
 	

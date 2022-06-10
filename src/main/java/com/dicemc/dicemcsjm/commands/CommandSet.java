@@ -11,7 +11,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class CommandSet{
 	
@@ -31,7 +31,7 @@ public class CommandSet{
 		BlockPos r = wsd.getJailReleasePos("default");
 		wsd.setJail(new Prison("default", p, r, 100));
 		wsd.setDirty();
-		context.getSource().getPlayerOrException().sendMessage(new TranslatableComponent("msg.setjail", "default", p.toString()), context.getSource().getPlayerOrException().getUUID());
+		context.getSource().getPlayerOrException().sendSystemMessage(Component.translatable("msg.setjail", "default", p.toString()));
 		return 0;
 	}
 	
@@ -42,7 +42,7 @@ public class CommandSet{
 		int leash = IntegerArgumentType.getInteger(context, "leash");
 		wsd.setJail(new Prison("default", p, r, leash));
 		wsd.setDirty();
-		context.getSource().getPlayerOrException().sendMessage(new TranslatableComponent("msg.setjail", "default", p.toString()), context.getSource().getPlayerOrException().getUUID());
+		context.getSource().getPlayerOrException().sendSystemMessage(Component.translatable("msg.setjail", "default", p.toString()));
 		return 0;
 	}
 	
@@ -54,7 +54,7 @@ public class CommandSet{
 		int leash = IntegerArgumentType.getInteger(context, "leash");
 		wsd.setJail(new Prison(prison, p, r, leash));
 		wsd.setDirty();
-		context.getSource().getPlayerOrException().sendMessage(new TranslatableComponent("msg.setjail", prison, p.toString()), context.getSource().getPlayerOrException().getUUID());
+		context.getSource().getPlayerOrException().sendSystemMessage(Component.translatable("msg.setjail", prison, p.toString()));
 		return 0;
 	}
 	

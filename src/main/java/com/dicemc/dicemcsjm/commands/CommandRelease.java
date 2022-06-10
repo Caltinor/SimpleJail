@@ -11,7 +11,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 
 public class CommandRelease implements Command<CommandSourceStack>{
@@ -34,12 +34,12 @@ public class CommandRelease implements Command<CommandSourceStack>{
 			if (wsd.getJailed().containsKey(player.getUUID())) {
 				wsd.getJailed().get(player.getUUID()).duration = System.currentTimeMillis();
 				wsd.setDirty();
-				context.getSource().sendSuccess(new TranslatableComponent("msg.release.success", player.getDisplayName()), false);
+				context.getSource().sendSuccess(Component.translatable("msg.release.success", player.getDisplayName()), false);
 				found = true;
 				break;
 			}			
 		}
-		if (!found) context.getSource().sendFailure(new TranslatableComponent("msg.error.noplayer"));
+		if (!found) context.getSource().sendFailure(Component.translatable("msg.error.noplayer"));
 		return 0;
 	}
 	

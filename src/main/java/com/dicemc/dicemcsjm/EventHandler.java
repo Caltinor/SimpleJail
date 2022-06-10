@@ -12,6 +12,7 @@ import com.dicemc.dicemcsjm.commands.CommandSetRelease;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
@@ -103,7 +104,7 @@ public class EventHandler {
 							if (!population.getValue().severity.equals(Type.SILENCED)) {
 								player.getInventory().load(population.getValue().inv);
 								BlockPos r = WSD.get(world).getJailReleasePos(population.getValue().prison);
-								player.setPosRaw(r.getX(), r.getY()+1, r.getZ());
+								player.teleportTo(r.getX(), r.getY()+1, r.getZ());
 							}
 						}
 						//check for out of place players and return them to jail
@@ -112,11 +113,8 @@ public class EventHandler {
 							BlockPos c = player.blockPosition();
 							BlockPos p = WSD.get(world).getJailPos(population.getValue().prison);
 							int leash = WSD.get(world).getJailLeash(population.getValue().prison);
-							if (!player.getLevel().equals(world)) {
+							if (!player.getLevel().equals(world) || c.distSqr(new Vec3i(p.getX(), p.getY(), p.getZ())) >= leash) {
 								player.teleportTo(world, p.getX(), p.getY(), p.getZ(), player.bob, player.getXRot());
-							}
-							else if (c.distSqr(p.getX(), p.getY(), p.getZ(), true) >= leash) {
-								player.setPosRaw(p.getX(), p.getY(), p.getZ());
 							}
 						}
 					}				
