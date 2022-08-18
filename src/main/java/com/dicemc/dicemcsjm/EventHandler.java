@@ -103,7 +103,7 @@ public class EventHandler {
 							if (!population.getValue().severity.equals(Type.SILENCED)) {
 								player.getInventory().load(population.getValue().inv);
 								BlockPos r = WSD.get(world).getJailReleasePos(population.getValue().prison);
-								player.setPosRaw(r.getX(), r.getY()+1, r.getZ());
+								player.moveTo(r.getX(), r.getY()+1, r.getZ());
 							}
 						}
 						//check for out of place players and return them to jail
@@ -115,12 +115,19 @@ public class EventHandler {
 							if (!player.getLevel().equals(world)) {
 								player.teleportTo(world, p.getX(), p.getY(), p.getZ(), player.bob, player.getXRot());
 							}
-							else if (c.distSqr(p.getX(), p.getY(), p.getZ(), true) >= leash) {
-								player.setPosRaw(p.getX(), p.getY(), p.getZ());
+							else if (distSqr(c, p) >= leash) {
+								player.moveTo(p.getX(), p.getY(), p.getZ());
 							}
 						}
 					}				
 				}
 		}
+	}
+	
+	private static int distSqr(BlockPos a, BlockPos b) {
+		return (int)Math.sqrt(
+				Math.pow(a.getX() - b.getX(), 2) +
+				Math.pow(a.getY() - b.getY(), 2) +
+				Math.pow(a.getZ() - b.getZ(), 2));
 	}
 }
